@@ -17,8 +17,8 @@ import org.gradle.api.GradleException
  */
 class JsMinifier {
 
-    void minifyJsFile(final Set<File> inputFiles, final Set<File> externsFiles, final File outputFile, final File sourceMap, CompilerOptions options,
-            final String warningLevel, final String compilationLevel) {
+    static void minifyJsFile(final Set<File> inputFiles, final Set<File> externsFiles, final File outputFile, final File sourceMap, CompilerOptions options,
+                             final String warningLevel, final String compilationLevel) {
         options = options ?: new CompilerOptions()
         options.setSourceMapOutputPath(sourceMap?.path)
         Compiler compiler = new Compiler()

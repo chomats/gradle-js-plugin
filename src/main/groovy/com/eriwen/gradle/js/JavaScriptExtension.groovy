@@ -7,7 +7,6 @@ import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Project
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.internal.reflect.Instantiator
-import org.gradle.util.ConfigureUtil
 
 class JavaScriptExtension {
     public static final NAME = "javascript"
@@ -24,6 +23,6 @@ class JavaScriptExtension {
     }
 
     void source(Closure closure) {
-        ConfigureUtil.configure(closure, source)
+        source.configure(closure)
     }
 }

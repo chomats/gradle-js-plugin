@@ -3,16 +3,16 @@ package com.eriwen.gradle.js.source.internal;
 import com.eriwen.gradle.js.source.JavaScriptProcessingChain;
 import com.eriwen.gradle.js.source.JavaScriptSourceSet;
 import groovy.lang.Closure;
-import org.gradle.api.Action;
+import org.gradle.api.Named;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.DefaultNamedDomainObjectList;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.internal.reflect.Instantiator;
 
-import java.util.Collections;
 import java.util.concurrent.Callable;
+
+import static org.gradle.api.internal.CollectionCallbackActionDecorator.NOOP;
 
 public class DefaultJavaScriptProcessingChain extends DefaultNamedDomainObjectList<SourceTask> implements JavaScriptProcessingChain {
 
@@ -20,7 +20,7 @@ public class DefaultJavaScriptProcessingChain extends DefaultNamedDomainObjectLi
     private final Project project;
 
     public DefaultJavaScriptProcessingChain(Project project, DefaultJavaScriptSourceSet source, Instantiator instantiator) {
-        super(SourceTask.class, instantiator, new Task.Namer());
+        super(SourceTask.class, instantiator, Named.Namer.INSTANCE, NOOP);
         this.source = source;
         this.project = project;
         wireChain();
@@ -31,23 +31,17 @@ public class DefaultJavaScriptProcessingChain extends DefaultNamedDomainObjectLi
     }
 
     protected void wireChain() {
-        all(new Action<SourceTask>() {
-            public void execute(final SourceTask sourceTask) {
-                sourceTask.source(new Callable<FileCollection>() {
-                    public FileCollection call() throws Exception {
-                        int index = indexOf(sourceTask);
-                        if (index == -1) {
-                            return null; // task has been removed, noop
-                        } else if (index == 0) {
-                            return getSource().getJs();
-                        } else {
-                            SourceTask previous = get(index - 1);
-                            return previous.getOutputs().getFiles();
-                        }
-                    }
-                });
+        all(sourceTask -> sourceTask.source((Callable<FileCollection>) () -> {
+            int index = indexOf(sourceTask);
+            if (index == -1) {
+                return null; // task has been removed, noop
+            } else if (index == 0) {
+                return getSource().getJs();
+            } else {
+                SourceTask previous = get(index - 1);
+                return previous.getOutputs().getFiles();
             }
-        });
+        }));
     }
 
     public <T extends SourceTask> T task(Class<T> type) {
@@ -64,7 +58,7 @@ public class DefaultJavaScriptProcessingChain extends DefaultNamedDomainObjectLi
 
     @SuppressWarnings("unchecked")
     public <T extends SourceTask> T task(String name, Class<T> type, Closure closure) {
-        T task = (T)project.task(Collections.singletonMap("type", type), name, closure);
+        T task = (T) project.getTasks().register(name, type, closure);
         add(task);
         return task;
     }

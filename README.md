@@ -1,4 +1,4 @@
-# This plugin is no longer maintained! Please consider the [Gradle Node Plugin](https://github.com/node-gradle/gradle-node-plugin).
+# This plugin is for gradle 8.14 and upper. You can build and deploy in your repository.
 
 # Gradle Javascript Plugin!
 Aiming to be the *simplest* way to manage your JavaScript in a build.
